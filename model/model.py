@@ -111,7 +111,7 @@ class BTModel(nn.Module):
 
 
 label_encoder = joblib.load('./model/label_encoder.joblib')
-# rf_classifier = joblib.load('./model/rf_classifier.joblib')
+rf_classifier = joblib.load('./model/rf_classifier.joblib')
 svm_classifier = joblib.load('./model/svm_classifier.joblib')
 xgb_classifier = joblib.load('./model/xgb_classifier.joblib')
 
@@ -153,7 +153,7 @@ def predict(image: Image.Image):
         image_numpy = resnet18(image_tensor)
         image_numpy = image_numpy.cpu().numpy()
     
-    # rf_class = rf_classifier.predict(image_numpy)
+    rf_class = rf_classifier.predict(image_numpy)
     svm_class = svm_classifier.predict(image_numpy)
     xgb_class = xgb_classifier.predict(image_numpy)
 
@@ -162,7 +162,7 @@ def predict(image: Image.Image):
         'densenet': densenet_class.item(),
         'efnet': efnet_class.item(),
         'bt': bt_class.item(),
-        # 'rf': rf_class[0],
+        'rf': rf_class[0],
         'svm': svm_class[0],
         'xgb': xgb_class[0]
     }
@@ -181,7 +181,7 @@ def predict(image: Image.Image):
     results['densenet'] = label_encoder.inverse_transform([results['densenet']])[0]
     results['efnet'] = label_encoder.inverse_transform([results['efnet']])[0]
     results['bt'] = label_encoder.inverse_transform([results['bt']])[0]
-    # results['rf'] = label_encoder.inverse_transform([results['rf']])[0]
+    results['rf'] = label_encoder.inverse_transform([results['rf']])[0]
     results['xgb'] = label_encoder.inverse_transform([results['xgb']])[0]
     results['svm'] = label_encoder.inverse_transform([results['svm']])[0]
     results['final'] = predicted_class
