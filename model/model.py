@@ -4,7 +4,9 @@ import numpy as np
 import torch.nn as nn
 import torchvision.models as models
 import torchvision.transforms.v2 as v2
+import model.download as dd
 from PIL import Image
+
 
 classnames = ['pituitary', 'notumor', 'meningioma', 'glioma']
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -110,28 +112,28 @@ class BTModel(nn.Module):
 
 
 
-label_encoder = joblib.load('./model/label_encoder.joblib')
-rf_classifier = joblib.load('./model/rf_classifier.joblib')
-svm_classifier = joblib.load('./model/svm_classifier.joblib')
-xgb_classifier = joblib.load('./model/xgb_classifier.joblib')
+label_encoder = joblib.load(dd.label_encoder)
+# rf_classifier = joblib.load(dd.rf_classifier)
+svm_classifier = joblib.load(dd.svm_classifier)
+xgb_classifier = joblib.load(dd.xgb_classifier)
 
 resnet_model = ResNet18Model(len(classnames)).to(device)
-resnet_model.load_state_dict(torch.load("./model/ResNet18Model.pth",
+resnet_model.load_state_dict(torch.load(dd.resnet_model,
                                             map_location=device,
                                             weights_only=False))
 
 densenet_model = DenseNetModel(len(classnames)).to(device)
-densenet_model.load_state_dict(torch.load("./model/DenseNetModel.pth",
+densenet_model.load_state_dict(torch.load(dd.dense_model,
                                          map_location=device,
                                          weights_only=False))
 
 efnet_model = EFNetModel(len(classnames)).to(device)
-efnet_model.load_state_dict(torch.load("./model/EFNetModel.pth",
+efnet_model.load_state_dict(torch.load(dd.efnet_model,
                                            map_location=device,
                                            weights_only=False))
 
 bt_model = BTModel(len(classnames)).to(device)
-bt_model.load_state_dict(torch.load("./model/BTModel.pth",
+bt_model.load_state_dict(torch.load(dd.bt_model,
                                         map_location=device,
                                         weights_only=False))
 
@@ -153,7 +155,7 @@ def predict(image: Image.Image):
         image_numpy = resnet18(image_tensor)
         image_numpy = image_numpy.cpu().numpy()
     
-    rf_class = rf_classifier.predict(image_numpy)
+    # rf_class = rf_classifier.predict(image_numpy)
     svm_class = svm_classifier.predict(image_numpy)
     xgb_class = xgb_classifier.predict(image_numpy)
 
@@ -162,7 +164,7 @@ def predict(image: Image.Image):
         'densenet': densenet_class.item(),
         'efnet': efnet_class.item(),
         'bt': bt_class.item(),
-        'rf': rf_class[0],
+        # 'rf': rf_class[0],
         'svm': svm_class[0],
         'xgb': xgb_class[0]
     }
@@ -181,7 +183,7 @@ def predict(image: Image.Image):
     results['densenet'] = label_encoder.inverse_transform([results['densenet']])[0]
     results['efnet'] = label_encoder.inverse_transform([results['efnet']])[0]
     results['bt'] = label_encoder.inverse_transform([results['bt']])[0]
-    results['rf'] = label_encoder.inverse_transform([results['rf']])[0]
+    # results['rf'] = label_encoder.inverse_transform([results['rf']])[0]
     results['xgb'] = label_encoder.inverse_transform([results['xgb']])[0]
     results['svm'] = label_encoder.inverse_transform([results['svm']])[0]
     results['final'] = predicted_class
